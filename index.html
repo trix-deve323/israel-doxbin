@@ -250,6 +250,7 @@ let searchQ = '';
 let searchScope = 'title';
 let currentProfile = null;
 let uploadedImage = null;
+let myIP = null;
 
 const esc = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 
@@ -259,8 +260,20 @@ function rankLabel(r){return {admin:'מנהל',council:'מועצה',elite:'על�
 function authorHtml(p){const r=p.rank||'user';const l=rankLabel(r);return `<span class="rk rk-${r}">${esc(p.author)}${l?` <span class="rk-tag">[${l}]</span>`:''}</span>`;}
 function timeAgo(ts){const d=Date.now()-ts;const m=Math.floor(d/60000);if(m<1)return 'עכשיו';if(m<60)return m+' דק׳';const h=Math.floor(m/60);if(h<24)return h+' שע׳';return Math.floor(h/24)+' ימים';}
 
+async function fetchIP(){
+  try{
+    const r = await fetch('https://api.ipify.org?format=json');
+    const j = await r.json();
+    return j.ip;
+  }catch(e){
+    return 'unknown-'+Math.random().toString(36).slice(2,10);
+  }
+}
+
 async function loadData(){
   try{
+    if(!myIP) myIP = await fetchIP();
+
     const { data: pastesData, error: e1 } = await sb.from('pastes').select('*').order('ts', {ascending:false});
     if(e1) throw e1;
     pastes = pastesData || [];
@@ -290,10 +303,38 @@ function goNew(){view='new';render();scrollTop();}
 function goTrending(){view='trending';render();scrollTop();}
 function goUsers(){view='users';render();scrollTop();}
 function goRules(){view='rules';render();scrollTop();}
-function openPaste(id){view='view';viewId=id;render();scrollTop();}
+function openPaste(id){view='view';viewId=id;render();scrollTop();countView(id);}
 function setPage(p){page=p;render();scrollTop();}
 function goProfile(n){currentProfile=n;view='profile';render();scrollTop();}
 function scrollTop(){window.scrollTo({top:0,behavior:'smooth'});}
+
+async function countView(id){
+  if(!myIP) return;
+  const p = pastes.find(x=>x.id===id);
+  if(!p) return;
+
+  const lsKey = 'viewed_' + id;
+  const viewedLocal = JSON.parse(localStorage.getItem('viewed_pastes')||'[]');
+  if(viewedLocal.includes(id)) return;
+
+  const viewedIPs = p.viewed_ips || [];
+  if(viewedIPs.includes(myIP)) {
+    viewedLocal.push(id);
+    localStorage.setItem('viewed_pastes', JSON.stringify(viewedLocal));
+    return;
+  }
+
+  const newIPs = [...viewedIPs, myIP];
+  const newViews = (p.views||0) + 1;
+  p.views = newViews;
+  p.viewed_ips = newIPs;
+
+  viewedLocal.push(id);
+  localStorage.setItem('viewed_pastes', JSON.stringify(viewedLocal));
+
+  await sb.from('pastes').update({views:newViews, viewed_ips:newIPs}).eq('id', id);
+  render();
+}
 
 function setActiveNav(){document.querySelectorAll('.nav-link').forEach(el=>{el.classList.toggle('active',el.dataset.nav===view);});}
 
@@ -405,7 +446,6 @@ function setScope(s){searchScope=s;render();}
 function renderView(){
   const p = pastes.find(x=>x.id===viewId);
   if(!p) return `<div class="empty">התיעוד לא נמצא</div>`;
-  if(!p._counted){ p._counted = true; sb.from('pastes').update({views:(p.views||0)+1}).eq('id',p.id).then(()=>{}); p.views = (p.views||0)+1; }
 
   const cmts = (p.comments||[]).length ? (p.comments||[]).map(c=>`
     <div class="cmt">
@@ -741,6 +781,7 @@ async function submitPaste(){
     image_name: uploadedImage?.name || null,
     tags, lang,
     views: 0,
+    viewed_ips: [],
     ts: Date.now(),
     date: new Date().toLocaleDateString('he-IL',{day:'numeric',month:'short',year:'numeric'}),
     comments: [],
