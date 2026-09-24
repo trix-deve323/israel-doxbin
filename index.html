@@ -251,7 +251,6 @@ let currentProfile = null;
 let uploadedImage = null;
 
 const esc = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-const uid = () => 'p'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
 
 function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');clearTimeout(t._tm);t._tm=setTimeout(()=>t.classList.remove('show'),2200);}
 function fmtNum(n){n=Number(n)||0;if(n>=1000000)return (n/1000000).toFixed(1).replace('.0','')+'M';if(n>=1000)return (n/1000).toFixed(1).replace('.0','')+'K';return n.toString();}
@@ -260,7 +259,6 @@ function authorHtml(p){const r=p.rank||'user';const l=rankLabel(r);return `<span
 function timeAgo(ts){const d=Date.now()-ts;const m=Math.floor(d/60000);if(m<1)return 'עכשיו';if(m<60)return m+' דק׳';const h=Math.floor(m/60);if(h<24)return h+' שע׳';return Math.floor(h/24)+' ימים';}
 
 async function loadData(){
-  document.getElementById('main').innerHTML = '<div class="empty">טוען נתונים...</div>';
   try{
     const { data: pastesData, error: e1 } = await sb.from('pastes').select('*').order('ts', {ascending:false});
     if(e1) throw e1;
@@ -312,6 +310,23 @@ function render(){
   if(view==='new') setupDropzone();
 }
 
+const LOGO_SVG = `<svg class="hero-logo" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <path d="M50 60 C38 45 30 25 36 12 C42 22 50 32 58 42" stroke="#e8e8e8" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M150 60 C162 45 170 25 164 12 C158 22 150 32 142 42" stroke="#e8e8e8" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M62 68 C52 55 46 38 52 26 C58 38 66 48 72 56" stroke="#e8e8e8" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M138 68 C148 55 154 38 148 26 C142 38 134 48 128 56" stroke="#e8e8e8" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M60 70 C48 80 42 100 44 120 C45 132 48 142 55 150 C62 158 72 165 82 168 C92 171 108 171 118 168 C128 165 138 158 145 150 C152 142 155 132 156 120 C158 100 152 80 140 70 C130 62 118 58 100 58 C82 58 70 62 60 70 Z" stroke="#e8e8e8" stroke-width="2.2" fill="none" stroke-linejoin="round"/>
+  <path d="M62 85 L85 92" stroke="#e8e8e8" stroke-width="2.4" stroke-linecap="round"/>
+  <path d="M138 85 L115 92" stroke="#e8e8e8" stroke-width="2.4" stroke-linecap="round"/>
+  <path d="M68 96 L84 98 L82 106 L70 104 Z" stroke="#e8e8e8" stroke-width="2" fill="#e8e8e8"/>
+  <path d="M132 96 L116 98 L118 106 L130 104 Z" stroke="#e8e8e8" stroke-width="2" fill="#e8e8e8"/>
+  <path d="M100 100 L96 118 L100 122 L104 118 Z" stroke="#e8e8e8" stroke-width="2" fill="none" stroke-linejoin="round"/>
+  <path d="M70 130 Q85 145 100 145 Q115 145 130 130" stroke="#e8e8e8" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+  <path d="M75 130 L78 140 M85 133 L87 143 M95 135 L96 145 M105 135 L104 145 M115 133 L113 143 M125 130 L122 140" stroke="#e8e8e8" stroke-width="1.8" stroke-linecap="round"/>
+  <path d="M85 150 L85 158 M100 152 L100 162 M115 150 L115 158" stroke="#e8e8e8" stroke-width="1.8" stroke-linecap="round"/>
+  <path d="M80 165 L100 175 L120 165" stroke="#e8e8e8" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>`;
+
 function renderFeed(){
   const q = searchQ.trim().toLowerCase();
   let list = pastes.filter(p=>{
@@ -355,17 +370,7 @@ function renderFeed(){
 
   return `
     <div class="hero">
-      <svg class="hero-logo" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M100 15 C55 15 40 45 40 80 C40 95 42 105 40 115 C38 125 30 130 30 130 L35 128 C40 125 45 122 50 122 C58 122 65 128 72 130 C80 132 88 128 95 130 L100 135 L105 130 C112 128 120 132 128 130 C135 128 142 122 150 122 C155 122 160 125 165 128 L170 130 C170 130 162 125 160 115 C158 105 160 95 160 80 C160 45 145 15 100 15 Z" stroke="#e8e8e8" stroke-width="2.2" fill="none"/>
-        <path d="M55 65 L65 45 L75 60 M145 65 L135 45 L125 60" stroke="#e8e8e8" stroke-width="2.2" fill="none"/>
-        <path d="M60 60 L70 50 L75 60 Z M140 60 L130 50 L125 60 Z" fill="#e8e8e8"/>
-        <path d="M65 95 Q80 85 95 95" stroke="#e8e8e8" stroke-width="2.2" fill="none"/>
-        <path d="M105 95 Q120 85 135 95" stroke="#e8e8e8" stroke-width="2.2" fill="none"/>
-        <circle cx="80" cy="95" r="2.6" fill="#e8e8e8"/><circle cx="120" cy="95" r="2.6" fill="#e8e8e8"/>
-        <path d="M75 125 Q100 145 125 125" stroke="#e8e8e8" stroke-width="2.2" fill="none"/>
-        <path d="M85 128 L85 145 M100 132 L100 150 M115 128 L115 145" stroke="#e8e8e8" stroke-width="1.8"/>
-        <path d="M80 150 L80 165 M100 155 L100 172 M120 150 L120 165" stroke="#e8e8e8" stroke-width="1.8"/>
-      </svg>
+      ${LOGO_SVG}
       <div class="hero-links">
         <a href="https://discord.gg/guardians-of-israel" target="_blank" rel="noopener">דיסקורד — שומרי ישראל</a>
       </div>
