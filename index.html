@@ -32,7 +32,7 @@ nav.main-nav{display:flex;gap:0;flex:1;}
 .user-nav .ua{width:22px;height:22px;background:#2a2a2a;display:grid;place-items:center;color:#e8e8e8;font-weight:700;font-size:11px;}
 .container{max-width:1160px;margin:0 auto;padding:0 18px;}
 .hero{text-align:center;padding:44px 18px 22px;}
-.hero-logo{width:200px;height:200px;margin:0 auto 22px;display:block;}
+.hero-logo{width:200px;height:200px;margin:0 auto 22px;display:block;object-fit:contain;}
 .hero-links{display:flex;flex-direction:column;gap:5px;align-items:center;margin-bottom:22px;}
 .hero-links a{color:var(--blue);font-size:14px;font-weight:500;}
 .hero-label{color:#7a7a7a;font-size:12px;margin-bottom:9px;}
@@ -236,6 +236,7 @@ footer{text-align:center;color:#3a3a3a;font-size:11px;padding:30px 18px;border-t
 const SUPABASE_URL = 'https://ujrnlgdqisadrxcwptzs.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_9xxKnIE7X85cBJ90JBvWLw_AGJ8hvvt';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const LOGO_URL = 'logo.png';
 
 let pastes = [];
 let users = {};
@@ -310,23 +311,6 @@ function render(){
   if(view==='new') setupDropzone();
 }
 
-const LOGO_SVG = `<svg class="hero-logo" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-  <path d="M50 60 C38 45 30 25 36 12 C42 22 50 32 58 42" stroke="#e8e8e8" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-  <path d="M150 60 C162 45 170 25 164 12 C158 22 150 32 142 42" stroke="#e8e8e8" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-  <path d="M62 68 C52 55 46 38 52 26 C58 38 66 48 72 56" stroke="#e8e8e8" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-  <path d="M138 68 C148 55 154 38 148 26 C142 38 134 48 128 56" stroke="#e8e8e8" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-  <path d="M60 70 C48 80 42 100 44 120 C45 132 48 142 55 150 C62 158 72 165 82 168 C92 171 108 171 118 168 C128 165 138 158 145 150 C152 142 155 132 156 120 C158 100 152 80 140 70 C130 62 118 58 100 58 C82 58 70 62 60 70 Z" stroke="#e8e8e8" stroke-width="2.2" fill="none" stroke-linejoin="round"/>
-  <path d="M62 85 L85 92" stroke="#e8e8e8" stroke-width="2.4" stroke-linecap="round"/>
-  <path d="M138 85 L115 92" stroke="#e8e8e8" stroke-width="2.4" stroke-linecap="round"/>
-  <path d="M68 96 L84 98 L82 106 L70 104 Z" stroke="#e8e8e8" stroke-width="2" fill="#e8e8e8"/>
-  <path d="M132 96 L116 98 L118 106 L130 104 Z" stroke="#e8e8e8" stroke-width="2" fill="#e8e8e8"/>
-  <path d="M100 100 L96 118 L100 122 L104 118 Z" stroke="#e8e8e8" stroke-width="2" fill="none" stroke-linejoin="round"/>
-  <path d="M70 130 Q85 145 100 145 Q115 145 130 130" stroke="#e8e8e8" stroke-width="2.2" fill="none" stroke-linecap="round"/>
-  <path d="M75 130 L78 140 M85 133 L87 143 M95 135 L96 145 M105 135 L104 145 M115 133 L113 143 M125 130 L122 140" stroke="#e8e8e8" stroke-width="1.8" stroke-linecap="round"/>
-  <path d="M85 150 L85 158 M100 152 L100 162 M115 150 L115 158" stroke="#e8e8e8" stroke-width="1.8" stroke-linecap="round"/>
-  <path d="M80 165 L100 175 L120 165" stroke="#e8e8e8" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-</svg>`;
-
 function renderFeed(){
   const q = searchQ.trim().toLowerCase();
   let list = pastes.filter(p=>{
@@ -370,7 +354,7 @@ function renderFeed(){
 
   return `
     <div class="hero">
-      ${LOGO_SVG}
+      <img class="hero-logo" src="${LOGO_URL}" alt="לוגו">
       <div class="hero-links">
         <a href="https://discord.gg/guardians-of-israel" target="_blank" rel="noopener">דיסקורד — שומרי ישראל</a>
       </div>
